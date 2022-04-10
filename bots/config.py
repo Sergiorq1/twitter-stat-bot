@@ -6,6 +6,7 @@ load_dotenv()
 logger = logging.getLogger()
 
 def create_api():
+    
     con_key = os.getenv("consumer_key")
     con_secret = os.getenv("consumer_secret")
     acc_token = os.getenv("access_token")
@@ -17,9 +18,7 @@ def create_api():
         api.verify_credentials()
     except Exception as e:
         logger.error("Error creating API", exc_info=True)
-        print("BIG ERROR")
         raise e
     logger.info("API created")
-    print("API created")
     return api
 create_api()
