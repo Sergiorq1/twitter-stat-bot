@@ -53,7 +53,6 @@ print(f'this is BOFF table: {cur.fetchall()}')
 # conn.commit()
 # cur.execute('SELECT * FROM AOFF')
 # print(f'this is AOFF table: {cur.fetchall()}')
-Player;Pos;Age;Tm;G;GS;MP;FG;FGA;FG%; 103P; 113PA; 123P%;13 2P;14 2PA;15 2P%;16 eFG%;17 FT;18 FTA;FT%;ORB;DRB;TRB;23AST;STL;BLK;TOV;PF;28PTS
 
 # # DEF Table 
 # cur.execute('DROP TABLE IF EXISTS DEF')
