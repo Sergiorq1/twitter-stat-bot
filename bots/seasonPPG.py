@@ -27,7 +27,9 @@ AOFFindices = [9,12,15,16,19]
 DEFindices = [24,25]
 OTHERindices = [20,21,22,26,27]
 BOFFheaders = [headers[index] for index in BOFFindices]
-print(BOFFheaders)
+AOFFheaders = [headers[index] for index in AOFFindices]
+DEFheaders = [headers[index] for index in DEFindices]
+OTHERheaders = [headers[index] for index in OTHERindices]
 #  GENERAL Table
 cur.execute('DROP TABLE IF EXISTS GENERAL')
 cur.execute('''CREATE TABLE GENERAL 
@@ -40,35 +42,38 @@ print(f'this is general table: {cur.fetchall()}')
 # BOFF Table
 cur.execute('DROP TABLE IF EXISTS BOFF')
 cur.execute('''CREATE TABLE BOFF 
-            (FG real, FGA real, 3P real, 3PA real, 2P real, 2PA real, FT real, FTA real, AST real, PTS real)''')
-cur.execute('INSERT INTO GENERAL VALUES(?,?,?,?,?,?,?,?,?,?)', BOFFheaders)
+            (FG real, FGA real, THP real, THPA real, TWOP real, TWOPA real, FT real, FTA real, AST real, PTS real)''')
+cur.execute('INSERT INTO BOFF VALUES(?,?,?,?,?,?,?,?,?,?)', BOFFheaders)
 conn.commit()
 cur.execute('SELECT * FROM BOFF')
 print(f'this is BOFF table: {cur.fetchall()}')
 
-# # AOFF Table 
-# cur.execute('DROP TABLE IF EXISTS AOFF')
-# cur.execute('''CREATE TABLE AOFF 
-#             (FGP real, 3PP real, 2PP real, eFGP real, FTP real)''')
-# conn.commit()
-# cur.execute('SELECT * FROM AOFF')
-# print(f'this is AOFF table: {cur.fetchall()}')
+# AOFF Table 
+cur.execute('DROP TABLE IF EXISTS AOFF')
+cur.execute('''CREATE TABLE AOFF 
+            (FGP real, THPP real, TWOPP real, eFGP real, FTP real)''')
+cur.execute('INSERT INTO AOFF VALUES(?,?,?,?,?)', AOFFheaders)
+conn.commit()
+cur.execute('SELECT * FROM AOFF')
+print(f'this is AOFF table: {cur.fetchall()}')
 
-# # DEF Table 
-# cur.execute('DROP TABLE IF EXISTS DEF')
-# cur.execute('''CREATE TABLE DEF 
-#             (STL real, BLK real)''')
-# conn.commit()
-# cur.execute('SELECT * FROM DEF')
-# print(f'this is DEF table: {cur.fetchall()}')
+# DEF Table 
+cur.execute('DROP TABLE IF EXISTS DEF')
+cur.execute('''CREATE TABLE DEF 
+            (STL real, BLK real)''')
+cur.execute('INSERT INTO DEF VALUES(?,?)', DEFheaders)
+conn.commit()
+cur.execute('SELECT * FROM DEF')
+print(f'this is DEF table: {cur.fetchall()}')
 
-# # OTHER Table 
-# cur.execute('DROP TABLE IF EXISTS OTHER')
-# cur.execute('''CREATE TABLE AOFF 
-#             (ORB real, DRB real, TRB real, TOV real, PF real)''')
-# conn.commit()
-# cur.execute('SELECT * FROM OTHER')
-# print(f'this is OTHER table: {cur.fetchall()}')
+# OTHER Table 
+cur.execute('DROP TABLE IF EXISTS OTHER')
+cur.execute('''CREATE TABLE OTHER 
+            (ORB real, DRB real, TRB real, TOV real, PF real)''')
+cur.execute('INSERT INTO OTHER VALUES(?,?,?,?,?)', OTHERheaders)
+conn.commit()
+cur.execute('SELECT * FROM OTHER')
+print(f'this is OTHER table: {cur.fetchall()}')
 
 
 #get rows from table
