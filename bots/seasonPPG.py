@@ -22,6 +22,7 @@ headers = [th.getText() for th in soup.findAll('tr')
 [0].findAll('th')]
 headers = headers[1:]
 Gheaders = headers[:7]
+Gindices = [0,1,2,3,4,5,6]
 BOFFindices = [7,8,10,11,13,14,17,18,23,28]
 AOFFindices = [9,12,15,16,19]
 DEFindices = [24,25]
@@ -78,10 +79,21 @@ print(f'this is OTHER table: {cur.fetchall()}')
 
 #get rows from table
 rows = soup.findAll('tr')[2:]
-rows_data = [[td.getText() for td in rows[i].findAll('td')] 
+rows_data = [[td.getText() for td in rows[i].findAll('td')]
 for i in range(len(rows))]
-rows_data = rows_data[0:38]
-rows_data = ["field1", "field2", "field3"]
+rows_data = rows_data[:38]
+
+Gheaders_rows_data = [[ td.getText() for td in rows[i].find('td')[Gindices]]
+for i in range(len(rows))]
+Gheaders_rows_data = Gheaders_rows_data[:38]
+
+#insert into table row by row General 
+cur.executemany("INSERT INTO GENERAL VALUES")
+
+
+
+
+
 cur.close()
 conn.close()
 
