@@ -84,22 +84,26 @@ rows = soup.findAll('tr', class_='full_table')
 # for i in range(len(rows))]
 # rows_data = rows_data[:38]
 # print(rows_data)
-listting = []
+GeneralData = []
 # G_rows_data = [[G_rows_data.append(rows[i].find('td')[td])] for td, i in zip(Gindices, range(len(rows)))]
-
+def convert(list, num):
+    new_list = []
+    for i in range(1, len(list)+1):
+        if i % num == 0:
+            new_list.append(tuple(list[i-num:i]))
+    return new_list
 #collecting 'GENERAL' data from table 
 for i in range(len(rows)):
     for td in Gindices:
-        listting.append(rows[i].findAll('td')[td].getText())
-
-# G_rows_data = [[td.getText() for td in rows[i].findAll('td')]
-# for i in range(len(rows))]
-# G_rows_data = G_rows_data[:10]
-print(listting[:30])
+        GeneralData.append(rows[i].findAll('td')[td].getText())
+GeneralData = convert(GeneralData, 7)
 
 #insert into table row by row General 
-# cur.executemany("INSERT INTO GENERAL VALUES")
 
+cur.executemany("INSERT INTO GENERAL VALUES(?,?,?,?,?,?,?)", (GeneralData))
+conn.commit()
+cur.execute('SELECT * FROM GENERAL')
+print(f'this is the general table with added data: {cur.fetchall()}')
 
 
 
