@@ -10,7 +10,7 @@ conn = sqlite3.connect('my_database.db')
 cur = conn.cursor()
 
 #url I'm scraping
-url = "https://www.basketball-reference.com/leagues/NBA_2022_per_game.html#per_game_stats::pts_per_g"
+url = "https://www.basketball-reference.com/leagues/NBA_2022_per_game.html"
 
 # collect html data
 html = urlopen(url)
@@ -78,17 +78,31 @@ print(f'this is OTHER table: {cur.fetchall()}')
 
 
 #get rows from table
-rows = soup.findAll('tr')[2:]
-rows_data = [[td.getText() for td in rows[i].findAll('td')]
-for i in range(len(rows))]
-rows_data = rows_data[:38]
+rows = soup.findAll('tr', class_='full_table')
+print(rows[:10])
+print(len(rows))
 
-Gheaders_rows_data = [[ td.getText() for td in rows[i].find('td')[Gindices]]
-for i in range(len(rows))]
-Gheaders_rows_data = Gheaders_rows_data[:38]
+print(len(rows))
+# rows_data = [[td.getText() for td in rows[i].findAll('td')]
+# for i in range(len(rows))]
+# rows_data = rows_data[:38]
+# print(rows_data)
+listting = []
+# G_rows_data = [[G_rows_data.append(rows[i].find('td')[td])] for td, i in zip(Gindices, range(len(rows)))]
+
+# for i in range(len(rows)):
+#     for td in Gindices:
+#         print(f'index is the following: {td}')
+#         listting.append(rows[i].findAll('td')[td])
+#         print(f'This is the list most recent addition: {listting[-1]}')
+
+# G_rows_data = [[td.getText() for td in rows[i].findAll('td')]
+# for i in range(len(rows))]
+# G_rows_data = G_rows_data[:10]
+print(listting[:30])
 
 #insert into table row by row General 
-cur.executemany("INSERT INTO GENERAL VALUES")
+# cur.executemany("INSERT INTO GENERAL VALUES")
 
 
 
