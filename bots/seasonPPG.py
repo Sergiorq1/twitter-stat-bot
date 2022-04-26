@@ -31,7 +31,8 @@ BOFFheaders = [headers[index] for index in BOFFindices]
 AOFFheaders = [headers[index] for index in AOFFindices]
 DEFheaders = [headers[index] for index in DEFindices]
 OTHERheaders = [headers[index] for index in OTHERindices]
-#  GENERAL Table
+
+#  INIT GENERAL Table
 cur.execute('DROP TABLE IF EXISTS GENERAL')
 cur.execute('''CREATE TABLE GENERAL 
             (Player text, Pos text, Age INTEGER, Tm text, G INTEGER, GS INTEGER, MP real)''')
@@ -40,7 +41,7 @@ conn.commit()
 cur.execute('SELECT * FROM GENERAL')
 print(f'this is general table: {cur.fetchall()}')
 
-# BOFF Table
+# INIT BOFF Table
 cur.execute('DROP TABLE IF EXISTS BOFF')
 cur.execute('''CREATE TABLE BOFF 
             (FG real, FGA real, THP real, THPA real, TWOP real, TWOPA real, FT real, FTA real, AST real, PTS real)''')
@@ -49,7 +50,7 @@ conn.commit()
 cur.execute('SELECT * FROM BOFF')
 print(f'this is BOFF table: {cur.fetchall()}')
 
-# AOFF Table 
+# INIT AOFF Table 
 cur.execute('DROP TABLE IF EXISTS AOFF')
 cur.execute('''CREATE TABLE AOFF 
             (FGP real, THPP real, TWOPP real, eFGP real, FTP real)''')
@@ -58,7 +59,7 @@ conn.commit()
 cur.execute('SELECT * FROM AOFF')
 print(f'this is AOFF table: {cur.fetchall()}')
 
-# DEF Table 
+# INIT DEF Table 
 cur.execute('DROP TABLE IF EXISTS DEF')
 cur.execute('''CREATE TABLE DEF 
             (STL real, BLK real)''')
@@ -67,7 +68,7 @@ conn.commit()
 cur.execute('SELECT * FROM DEF')
 print(f'this is DEF table: {cur.fetchall()}')
 
-# OTHER Table 
+# INIT OTHER Table 
 cur.execute('DROP TABLE IF EXISTS OTHER')
 cur.execute('''CREATE TABLE OTHER 
             (ORB real, DRB real, TRB real, TOV real, PF real)''')
@@ -76,31 +77,29 @@ conn.commit()
 cur.execute('SELECT * FROM OTHER')
 print(f'this is OTHER table: {cur.fetchall()}')
 
-
-#get rows from table
-rows = soup.findAll('tr', class_='full_table')
-
-# rows_data = [[td.getText() for td in rows[i].findAll('td')]
-# for i in range(len(rows))]
-# rows_data = rows_data[:38]
-# print(rows_data)
-GeneralData = []
-# G_rows_data = [[G_rows_data.append(rows[i].find('td')[td])] for td, i in zip(Gindices, range(len(rows)))]
+#Convert function to create tuples
 def convert(list, num):
     new_list = []
     for i in range(1, len(list)+1):
         if i % num == 0:
             new_list.append(tuple(list[i-num:i]))
     return new_list
-#collecting 'GENERAL' data from table 
-for i in range(len(rows)):
-    for td in Gindices:
-        GeneralData.append(rows[i].findAll('td')[td].getText())
-GeneralData = convert(GeneralData, 7)
 
+#get rows from table
+rows = soup.findAll('tr', class_='full_table')
+
+Glist = []
+
+#collecting 'GENERAL' data for table 
+def collectData(indices, list):
+    for i in range(len(rows)):
+        for td in indices:
+            list.append(rows[i].findAll('td')[td].getText())
+collectData(Gindices, Glist)
+Glist = convert(Glist, len(Gindices))
 #insert into table row by row General 
 
-cur.executemany("INSERT INTO GENERAL VALUES(?,?,?,?,?,?,?)", (GeneralData))
+cur.executemany("INSERT INTO GENERAL VALUES(?,?,?,?,?,?,?)", (Glist))
 conn.commit()
 cur.execute('SELECT * FROM GENERAL')
 print(f'this is the general table with added data: {cur.fetchall()}')
