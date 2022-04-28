@@ -110,16 +110,16 @@ cur.executemany("INSERT INTO AOFF VALUES(?,?,?,?,?)", (AOFFlist))
 
 ##### GET top 10 players with highest effective FG percentage #####
 # find 10 highest numbers in eFG%
-
-cur.execute("CREATE INDEX id_EFGP ON AOFF(EFGP)")
-cur.execute("PRAGMA index_list(AOFF)")
-print(cur.fetchall())
-cur.execute('SELECT EFGP FROM AOFF GROUP BY EFGP HAVING EFGP < 1.1 ORDER BY EFGP DESC LIMIT 20')
-EFGP = cur.fetchall()
-print(f'these are the top 10 players with the highest Effective field goal percentage: {EFGP}')
-conn.commit()
 # sort from Greatest to lowest, and also retrieve tuple numbers that correspond
+cur.execute('SELECT rowid, EFGP FROM AOFF GROUP BY EFGP HAVING EFGP < 1.1 ORDER BY EFGP DESC LIMIT 20')
+EFGP_stats = cur.fetchall()
+print(f'these are the top 10 players with the highest Effective field goal percentage: {EFGP_stats}')
+conn.commit()
 # SELECT FROM GENERAL table to get names of NBA players using tuple numbers
+
+player_id = list(i[0] for i in EFGP_stats)
+print(player_id)
+cur.execute('SELECT Player FROM GENERAL WHERE rowid=?', (player_id,))
 # make a twitter post that uses acquired data to automate EFG% 
 
 
