@@ -116,10 +116,34 @@ EFGP_stats = cur.fetchall()
 print(f'these are the top 10 players with the highest Effective field goal percentage: {EFGP_stats}')
 conn.commit()
 # SELECT FROM GENERAL table to get names of NBA players using tuple numbers
-
+#ordered list of highest to lowest efg%
 player_id = list(i[0] for i in EFGP_stats)
-print(player_id)
-cur.execute('SELECT Player FROM GENERAL WHERE rowid=?', (player_id,))
+efgp_players = 'SELECT rowid, Player, TM FROM GENERAL where rowid IN ({seq})'.format(
+    seq=','.join(['?']*len(player_id)))
+cur.execute(efgp_players, player_id)
+players = cur.fetchall()
+print(players)
+#reorganize players list by comaring it to player_id
+def sort_this():
+    new_list = []
+    #only loops once
+    for id in player_id:
+        #loops as many times as necessary
+        for i in range(len(players)):
+            # if current index value num matches current index 
+            if players[i] == id:
+                new_list.append(id)
+                break
+            else:
+                continue
+    return new_list
+print(sort_this())
+
+
+
+                    
+
+
 # make a twitter post that uses acquired data to automate EFG% 
 
 
