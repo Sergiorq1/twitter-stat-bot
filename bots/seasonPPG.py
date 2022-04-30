@@ -113,7 +113,7 @@ cur.executemany("INSERT INTO AOFF VALUES(?,?,?,?,?)", (AOFFlist))
 # sort from Greatest to lowest, and also retrieve tuple numbers that correspond
 cur.execute('SELECT rowid, EFGP FROM AOFF GROUP BY EFGP HAVING EFGP < 1.1 ORDER BY EFGP DESC LIMIT 20')
 EFGP_stats = cur.fetchall()
-print(f'these are the top 10 players with the highest Effective field goal percentage: {EFGP_stats}')
+# print(f'these are the top 10 players with the highest Effective field goal percentage: {EFGP_stats}')
 conn.commit()
 # SELECT FROM GENERAL table to get names of NBA players using tuple numbers
 #ordered list of highest to lowest efg%
@@ -122,22 +122,27 @@ efgp_players = 'SELECT rowid, Player, TM FROM GENERAL where rowid IN ({seq})'.fo
     seq=','.join(['?']*len(player_id)))
 cur.execute(efgp_players, player_id)
 players = cur.fetchall()
-print(players)
-#reorganize players list by comaring it to player_id
-def sort_this():
-    new_list = []
+# reorganize players list by comaring it to player_id
+def sort_this(sorted_list,tuple_list):
     #only loops once
-    for id in player_id:
+    for id in range(len(sorted_list)):
         #loops as many times as necessary
-        for i in range(len(players)):
+        for i in range(len(tuple_list)):
             # if current index value num matches current index 
-            if players[i] == id:
-                new_list.append(id)
+            if tuple_list[i][0] == sorted_list[id]:
+                tuple_list.insert(id, tuple_list[i])
+                #if tuple_list index position is greater than index position of s_list
+                if i > id:
+                    tuple_list.pop(i+1)
+                else:
+                    tuple_list.pop(i)
                 break
             else:
                 continue
-    return new_list
-print(sort_this())
+
+    return tuple_list
+print(sort_this(player_id, players))
+print(player_id)
 
 
 
