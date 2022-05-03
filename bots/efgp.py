@@ -6,9 +6,6 @@ from config import scrape_season_stats, collect_data_season, convert, db_season_
 import pandas as pd
 import sqlite3
 
-scrape_season_stats()
-collect_data_season()
-db_season_stats()
 ##### GET top 10 players with highest effective FG percentage #####
 def top_efgp():
     conn, cur = db_season_stats()
@@ -27,8 +24,10 @@ def top_efgp():
     players = cur.fetchall()
     cur.close()
     conn.close()
-# reorganize players list by comaring it to player_id
-def sort_this(sorted_list,tuple_list):
+    return player_id, players
+
+# reorganize players list by comaring it to a given list, only works correctly if match
+def sort_tuples(sorted_list,tuple_list):
     #only loops once
     for id in range(len(sorted_list)):
         #loops as many times as necessary
@@ -46,7 +45,12 @@ def sort_this(sorted_list,tuple_list):
                 continue
 
     return tuple_list
-print(sort_this(player_id, players))
+
+scrape_season_stats()
+db_season_stats()
+top_efgp()
+player_id, players = top_efgp()
+print(sort_tuples(player_id, players))
 print(player_id)
 
 # make a twitter post that uses acquired data to automate EFG% 
