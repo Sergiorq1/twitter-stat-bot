@@ -5,6 +5,10 @@ from bs4 import BeautifulSoup
 from config import scrape_season_stats, collect_data_season, convert, db_season_stats
 import pandas as pd
 import sqlite3
+import tweepy
+import logging
+from config import create_api
+import time
 
 ##### GET top 10 players with highest effective FG percentage #####
 def top_efgp():
@@ -46,6 +50,7 @@ def sort_tuples(sorted_list,tuple_list):
 
     return tuple_list
 
+#Calling functions
 scrape_season_stats()
 db_season_stats()
 top_efgp()
@@ -53,6 +58,26 @@ player_id, players = top_efgp()
 print(sort_tuples(player_id, players))
 print(player_id)
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
+
+def top_efgp_tweet(api):
+    logger.info("Tweeting top 20 effective field goal percentage havers")
+    #Initialize Tweet to make thread after
+    message = "Top 20 NBA EFG%% players, a thread:"
+    
+
+    api.update_status(message)
+
+def main():
+    api = create_api()
+    while True:
+        top_efgp_tweet(api)
+        logger.info("Waiting...")
+        time.sleep(60)
+
+if __name__ == "__main__":
+    main()
 # make a twitter post that uses acquired data to automate EFG% 
 
 
