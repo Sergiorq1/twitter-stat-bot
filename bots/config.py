@@ -2,6 +2,10 @@ import os
 from dotenv import load_dotenv
 import tweepy
 import logging
+import requests
+import time
+import sys
+import inspect
 from tkinter.tix import INTEGER
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
@@ -32,7 +36,20 @@ def scrape_season_stats():
     url = "https://www.basketball-reference.com/leagues/NBA_2022_per_game.html"
 
     # collect html data
-    html = urlopen(url)
+    #loops three times to make it stronger
+    html = None   
+    for i in [1,2,3]:        
+        try:  
+            r = requests.get(url, timeout=30)
+            html = r.text
+            if html: break
+        except Exception as e:
+            sys.stderr.write('Got error when requesting URL "' + url + '": ' + str(e) + '\n')
+            if i == 3 :
+                sys.stderr.write('{0.filename}@{0.lineno}: Failed requesting from URL "{1}" ==> {2}\n'.                       format(inspect.getframeinfo(inspect.currentframe()), url, e))
+                raise e
+            time.sleep(10*(i-1))
+    # html = urlopen(url)
 
     #create beautiful soup object from HTML
     soup = BeautifulSoup(html, 'html.parser')
@@ -118,7 +135,7 @@ def db_season_stats():
     cur.execute('INSERT INTO OTHER VALUES(?,?,?,?,?)', OTHERheaders)
     cur.execute('SELECT * FROM OTHER')
     print(f'this is OTHER table: {cur.fetchall()}')
-
+    conn.commit()
     #collecting and format data for table
     collect_data_season(Gindices, Glist)
     collect_data_season(BOFFindices, BOFFlist)
