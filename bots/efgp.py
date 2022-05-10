@@ -80,8 +80,6 @@ def top_efgp_tweet():
     reply_changes = []
     for player in range(len(reply)):
         num_list.append(player)
-        print(f'this is numlist BTW {num_list}')
-        print(f'this is REPLY len {len(reply)}')
         # if max character size is reached
         if sum(len(i) for i in reply[num_list[0]:(player+1)]) > 281:
             # create a tuple of max amount of players who will fit into one tweet
@@ -89,32 +87,21 @@ def top_efgp_tweet():
             reply.insert(player+1, tuple(reply[ num_list[0] : (num_list[0]+len(num_list)) ]))
             #remove duplicated
             reply = reply[:(player+1)-len(num_list)] + reply[player+1:]
-            print(f'###########this is tupled reply##########: {reply}')
             #clear list so next first index of new_list matches the tuple creation's beginning index
             reply_changes.append(1)
             num_list.clear()
-    #if you reach the end of the list
-    print(f"__________HEY WE GOT HERE HI_________{num_list} and index zero{num_list[0]} and length {len(num_list)}")
-    print(f"{(num_list[0]+len(num_list))}")
-    print(f"Length of num_list; {len(num_list)}")
     #extend based on all numbers outside the tuple
     #without using reply[1] because it may not even be the second index
-    # if len(num_list)
-    # reply.insert()
-    print(f'lets try this for fun {reply[0]} __________________ {reply[1:]}')
     insert_len = len(reply[len(reply_changes):])
     reply.insert(-1, tuple(reply[len(reply_changes):]))
     reply.pop()
-    print(f"What does this show?? not adding up {reply}")
     reply = reply[:len(reply_changes)] + reply[insert_len:]
     print(f"This should be it..... {reply}")
 
     #delete the duplicate indices
     # print(f'this is two tuples hopfully {reply}')
 
-##########OHHHH it's because when a bunch of players are inside a tuple, they become a single index. to fix this, 
 
-###
     return reply, len(reply)
     #tweets out the grouped sections 
 print(top_efgp_tweet())
