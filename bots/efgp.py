@@ -1,5 +1,6 @@
 # 10 highest ppg of current season
 from tkinter.tix import INTEGER
+from datetime import date
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from config import scrape_season_stats, collect_data_season, convert, db_season_stats
@@ -9,6 +10,9 @@ import tweepy
 import logging
 from config import create_api
 import time
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger()
 ### Add totals for attempts after because I have to access a different URL and add data to table, for future implementations ###
 
 ##### GET top 10 players with highest effective FG percentage #####
@@ -66,10 +70,7 @@ print(player_id)
 def top_efgp_tweet():
     api = create_api()
     player_stats = top_efgp()[2]
-    # logger.info("Tweeting top 20 effective field goal percentage havers")
-    # Initialize Tweet to build thread under
-    # tweet = "Top 20 NBA EFG%% players, a thread:"
-    # tweet_head = api.update_status(tweet)
+
     reply = []
     for i in range(len(players)):
         #formulate reply player from team percentage
@@ -81,15 +82,16 @@ def top_efgp_tweet():
     for player in range(len(reply)):
         num_list.append(player)
         # if max character size is reached
-        if sum(len(i) for i in reply[num_list[0]:(player+1)]) > 281:
+        if sum(len(i) for i in reply[num_list[0]:(player)]) > 280:
             # create a tuple of max amount of players who will fit into one tweet
             #first add tuple in front of soon-to-be-removed indices
-            reply.insert(player+1, tuple(reply[ num_list[0] : (num_list[0]+len(num_list)) ]))
+            reply.insert(player+1, tuple(reply[ num_list[0] : (num_list[0]+(len(num_list)-2)) ]))
             #remove duplicated
             reply = reply[:(player+1)-len(num_list)] + reply[player+1:]
             #clear list so next first index of new_list matches the tuple creation's beginning index
             reply_changes.append(1)
             num_list.clear()
+            print("THIS HAS BEEN CALLED ________________:::::::::____________")
     #extend based on all numbers outside the tuple
     #without using reply[1] because it may not even be the second index
     insert_len = len(reply[len(reply_changes):])
@@ -97,13 +99,33 @@ def top_efgp_tweet():
     reply.pop()
     reply = reply[:len(reply_changes)] + reply[insert_len:]
     print(f"This should be it..... {reply}")
-
-    #delete the duplicate indices
-    # print(f'this is two tuples hopfully {reply}')
-
-
-    return reply, len(reply)
+    print(reply, len(reply))
+    print(f'this is sum of first tuple reply {sum(len(i) for i in reply[0])}')
+    print(f'this is sum of SECOND tuple reply {sum(len(i) for i in reply[1])}')
     #tweets out the grouped sections 
+    today = date.today()
+    d1 = today.strftime("%d/%m/%Y")
+    logger.info("Tweeting top 20 effective field goal percentage havers")
+    # Initialize Tweet to build thread under
+    tweet = f"Top 20 NBA EFG%% players (as of {d1}), a thread:"
+    tweet_head = api.update_status(status=tweet)
+    print(f'this is too large {reply[0]}')
+    #reformats tuples into tweet form
+    # for tuple in range(len(tweet)):
+    #     " \n".join(tuple)
+
+    reply = [" ".join(tups) for tups in reply]
+    for i in range(len(reply)):
+        if i == 0:
+            thread_init = api.update_status(status=reply[i],in_reply_to_status_id=tweet_head.id,auto_populate_reply_metadata=True)
+        elif i == 1:
+            after = api.update_status(status=reply[i],in_reply_to_status_id=thread_init.id,auto_populate_reply_metadata=True)  
+        else:
+            after = api.update_status(status=reply[i],in_reply_to_status_id=after.id,auto_populate_reply_metadata=True)  
+
+
+
+
 print(top_efgp_tweet())
         
 
