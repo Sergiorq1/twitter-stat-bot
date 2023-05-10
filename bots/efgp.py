@@ -1,5 +1,4 @@
-# 10 highest ppg of current season
-# from tkinter.tix import INTEGER
+# Effective field goal percentage leaders in a season
 from datetime import date
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
@@ -10,6 +9,7 @@ import tweepy
 import logging
 from config import create_api
 import time
+# from tkinter.tix import INTEGER
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
@@ -36,7 +36,7 @@ def top_efgp():
     conn.close()
     return player_id, players, player_stats
 
-# reorganize players list by comaring it to a given list, only works correctly if match
+# reorganize players list by comparing it to a given list, only works correctly if match
 def sort_tuples(sorted_list,tuple_list):
     #only loops once
     for id in range(len(sorted_list)):
@@ -56,7 +56,7 @@ def sort_tuples(sorted_list,tuple_list):
 
     return tuple_list
 
-#Calling functions
+#Calling functions from config.py
 scrape_season_stats()
 db_season_stats()
 top_efgp()

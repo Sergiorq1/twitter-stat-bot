@@ -6,16 +6,17 @@ import requests
 import time
 import sys
 import inspect
-# from tkinter.tix import INTEGER
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import pandas as pd
 import sqlite3
+# from tkinter.tix import INTEGER
 load_dotenv()
 logger = logging.getLogger()
 
-# Creates API connection to twitter to make tweets
-## You need to create your own twitter developer account to test out your twitter animations
+## Creates API connection to twitter to make tweets
+# You need to create your own twitter developer account to test out your twitter animations
+# This function is only used in other files
 def create_api():
     con_key = os.getenv("consumer_key")
     con_secret = os.getenv("consumer_secret")
@@ -31,7 +32,11 @@ def create_api():
         raise e
     logger.info("API created")
     return api
+
 # Scrapes the entire page stats for every NBA player in given season
+#### TODO ####
+# make the year modular, meaning when calling the function, you can change what year to scrape stats from
+# Helper function for collect_data_season
 def scrape_season_stats():
     #url I'm scraping
     url = "https://www.basketball-reference.com/leagues/NBA_2022_per_game.html"
@@ -68,88 +73,115 @@ def scrape_season_stats():
     return headers, rows
 
 # Iterates through each row and extracts text from all 'td' tags
+# the 'td' tags in the website are where the stats are coming from
+# Helper function for db_season_stats
 def collect_data_season(indices, list):
     headers, rows = scrape_season_stats()
+    #Loops through each row 
     for i in range(len(rows)):
+        # in each row, loop through headers and append the given indices
         for td in indices:
             list.append(rows[i].findAll('td')[td].getText())
+
 # Formats a list by grouping into tuples to easily add onto tables
+# Helper function for db_season_stats
 def convert(list, num):
     new_list = []
     for i in range(1, len(list)+1):
         if i % num == 0:
             new_list.append(tuple(list[i-num:i]))
     return new_list
-# Creates database and tables and populate tables 
+
+# Creates database and tables and populates tables 
 def db_season_stats():
     headers, rows = scrape_season_stats()
     # database connection
     conn = sqlite3.connect('my_database.db')
     cur = conn.cursor()
     
+    # WHen scraping data, each index represents a particular statistic
+    # In these next few lines, we are grouping the statistics into different categories 
+    # G == General, BOFF == Basic Offensive stats, AOFF == Advanced Offensive Stats, DEF == Defensive Stats
     Gindices = [0,1,2,3,4,5,6]
     BOFFindices = [7,8,10,11,13,14,17,18,23,28]
     AOFFindices = [9,12,15,16,19]
     DEFindices = [24,25]
     OTHERindices = [20,21,22,26,27]
+
+    #initialize empty list for each statistical category
     Glist = []
     BOFFlist = []
     AOFFlist = []
     DEFlist = []
     OTHERlist = []
+
+    #picks the headers based off specified indices
     Gheaders = headers[:7]
     BOFFheaders = [headers[index] for index in BOFFindices]
     AOFFheaders = [headers[index] for index in AOFFindices]
     DEFheaders = [headers[index] for index in DEFindices]
     OTHERheaders = [headers[index] for index in OTHERindices]
 
-    #  INIT GENERAL Table
+    # Collecting and format data for table
+    #The helper function uses the grouped indices (Gindices) to append to data into list (Glist)
+    collect_data_season(Gindices, Glist)
+    collect_data_season(BOFFindices, BOFFlist)
+    collect_data_season(AOFFindices, AOFFlist)
+    collect_data_season(DEFindices, DEFlist)
+    collect_data_season(OTHERindices, OTHERlist)
+
+    # converts 
+    Glist = convert(Glist, len(Gindices))
+    BOFFlist = convert(BOFFlist, len(BOFFindices))
+    AOFFlist = convert(AOFFlist, len(AOFFindices))
+    DEFlist = convert(DEFlist, len(DEFindices))
+    OTHERlist = convert(OTHERlist, len(OTHERindices))
+
+    ## INIT GENERAL Table
+    # remove general table if it exists already
     cur.execute('DROP TABLE IF EXISTS GENERAL')
+    # create table general with all general categories
     cur.execute('''CREATE TABLE GENERAL 
                 (Player text, Pos text, Age INTEGER, Tm text, G INTEGER, GS INTEGER, MP real)''')
+    # insert the values of 
     cur.execute('INSERT INTO GENERAL VALUES(?,?,?,?,?,?,?)', Gheaders)
     cur.execute('SELECT * FROM GENERAL')
     print(f'this is general table: {cur.fetchall()}')
-    # INIT BOFF Table
+
+    ## INIT BOFF Table
     cur.execute('DROP TABLE IF EXISTS BOFF')
     cur.execute('''CREATE TABLE BOFF 
                 (FG real, FGA real, THP real, THPA real, TWOP real, TWOPA real, FT real, FTA real, AST real, PTS real)''')
     cur.execute('INSERT INTO BOFF VALUES(?,?,?,?,?,?,?,?,?,?)', BOFFheaders)
     cur.execute('SELECT * FROM BOFF')
     print(f'this is BOFF table: {cur.fetchall()}')
-    # INIT AOFF Table 
+
+    ## INIT AOFF Table 
     cur.execute('DROP TABLE IF EXISTS AOFF')
     cur.execute('''CREATE TABLE AOFF 
                 (FGP real, THPP real, TWOPP real, eFGP real, FTP real)''')
     cur.execute('INSERT INTO AOFF VALUES(?,?,?,?,?)', AOFFheaders)
     cur.execute('SELECT * FROM AOFF')
     print(f'this is AOFF table: {cur.fetchall()}')
-    # INIT DEF Table 
+
+    ## INIT DEF Table 
     cur.execute('DROP TABLE IF EXISTS DEF')
     cur.execute('''CREATE TABLE DEF 
                 (STL real, BLK real)''')
     cur.execute('INSERT INTO DEF VALUES(?,?)', DEFheaders)
     cur.execute('SELECT * FROM DEF')
     print(f'this is DEF table: {cur.fetchall()}')
-    # INIT OTHER Table 
+
+    ## INIT OTHER Table 
     cur.execute('DROP TABLE IF EXISTS OTHER')
     cur.execute('''CREATE TABLE OTHER 
                 (ORB real, DRB real, TRB real, TOV real, PF real)''')
     cur.execute('INSERT INTO OTHER VALUES(?,?,?,?,?)', OTHERheaders)
     cur.execute('SELECT * FROM OTHER')
     print(f'this is OTHER table: {cur.fetchall()}')
+
+    # This commits all the added tables and categories, essential to keep it saved 
     conn.commit()
-    #collecting and format data for table
-    collect_data_season(Gindices, Glist)
-    collect_data_season(BOFFindices, BOFFlist)
-    collect_data_season(AOFFindices, AOFFlist)
-    collect_data_season(DEFindices, DEFlist)
-    collect_data_season(OTHERindices, OTHERlist)
-    Glist = convert(Glist, len(Gindices))
-    BOFFlist = convert(BOFFlist, len(BOFFindices))
-    AOFFlist = convert(AOFFlist, len(AOFFindices))
-    DEFlist = convert(DEFlist, len(DEFindices))
-    OTHERlist = convert(OTHERlist, len(OTHERindices))
 
     cur.executemany("INSERT INTO GENERAL VALUES(?,?,?,?,?,?,?)", (Glist))
     cur.executemany("INSERT INTO BOFF VALUES(?,?,?,?,?,?,?,?,?,?)", (BOFFlist))
@@ -157,6 +189,7 @@ def db_season_stats():
     cur.executemany("INSERT INTO DEF VALUES(?,?)", (DEFlist))
     cur.executemany("INSERT INTO OTHER VALUES(?,?,?,?,?)", (OTHERlist))
     return conn, cur
+
 
 
             
