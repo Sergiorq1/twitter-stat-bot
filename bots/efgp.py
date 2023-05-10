@@ -1,5 +1,5 @@
 # 10 highest ppg of current season
-from tkinter.tix import INTEGER
+# from tkinter.tix import INTEGER
 from datetime import date
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
@@ -107,7 +107,7 @@ def top_efgp_tweet():
     d1 = today.strftime("%d/%m/%Y")
     logger.info("Tweeting top 20 effective field goal percentage havers")
     # Initialize Tweet to build thread under
-    tweet = f"Top 20 NBA EFG%% players (as of {d1}), a thread:"
+    tweet = f"Top 20 NBA EFG% players (as of {d1}), a thread \U0001F9F5:"
     tweet_head = api.update_status(status=tweet)
     print(f'this is too large {reply[0]}')
     #reformats tuples into tweet form

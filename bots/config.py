@@ -1,12 +1,12 @@
 import os
 from dotenv import load_dotenv
-import tweepy
+import tweepy 
 import logging
 import requests
 import time
 import sys
 import inspect
-from tkinter.tix import INTEGER
+# from tkinter.tix import INTEGER
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -14,7 +14,8 @@ import sqlite3
 load_dotenv()
 logger = logging.getLogger()
 
-#Creates API connection to twitter to make tweets
+# Creates API connection to twitter to make tweets
+## You need to create your own twitter developer account to test out your twitter animations
 def create_api():
     con_key = os.getenv("consumer_key")
     con_secret = os.getenv("consumer_secret")
@@ -65,6 +66,7 @@ def scrape_season_stats():
     # #export to CSV
     # player_stats.to_csv("players_stats.csv", index=False, sep=";")
     return headers, rows
+
 # Iterates through each row and extracts text from all 'td' tags
 def collect_data_season(indices, list):
     headers, rows = scrape_season_stats()
@@ -84,7 +86,7 @@ def db_season_stats():
     # database connection
     conn = sqlite3.connect('my_database.db')
     cur = conn.cursor()
-    Gheaders = headers[:7]
+    
     Gindices = [0,1,2,3,4,5,6]
     BOFFindices = [7,8,10,11,13,14,17,18,23,28]
     AOFFindices = [9,12,15,16,19]
@@ -95,6 +97,7 @@ def db_season_stats():
     AOFFlist = []
     DEFlist = []
     OTHERlist = []
+    Gheaders = headers[:7]
     BOFFheaders = [headers[index] for index in BOFFindices]
     AOFFheaders = [headers[index] for index in AOFFindices]
     DEFheaders = [headers[index] for index in DEFindices]
