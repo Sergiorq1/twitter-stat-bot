@@ -61,8 +61,8 @@ scrape_season_stats()
 db_season_stats()
 top_efgp()
 player_id, players = top_efgp()[:2]
-print(sort_tuples(player_id, players))
-print(player_id)
+# print(sort_tuples(player_id, players))
+# print(player_id)
 
 # logging.basicConfig(level=logging.INFO)
 # logger = logging.getLogger()
@@ -75,7 +75,7 @@ def top_efgp_tweet():
     for i in range(len(players)):
         #formulate reply player from team percentage
         reply.append(f'''{players[i][1]} from {players[i][2]} ({player_stats[i]})''')
-    print(reply)
+    # print(reply)
     # groups thread into sections that will be just under the 280 character size limit
     num_list = []
     reply_changes = []
@@ -91,17 +91,16 @@ def top_efgp_tweet():
             #clear list so next first index of new_list matches the tuple creation's beginning index
             reply_changes.append(1)
             num_list.clear()
-            print("THIS HAS BEEN CALLED ________________:::::::::____________")
     #extend based on all numbers outside the tuple
     #without using reply[1] because it may not even be the second index
     insert_len = len(reply[len(reply_changes):])
     reply.insert(-1, tuple(reply[len(reply_changes):]))
     reply.pop()
     reply = reply[:len(reply_changes)] + reply[insert_len:]
-    print(f"This should be it..... {reply}")
-    print(reply, len(reply))
-    print(f'this is sum of first tuple reply {sum(len(i) for i in reply[0])}')
-    print(f'this is sum of SECOND tuple reply {sum(len(i) for i in reply[1])}')
+    # print(f"This should be it..... {reply}")
+    # print(reply, len(reply))
+    # print(f'this is sum of first tuple reply {sum(len(i) for i in reply[0])}')
+    # print(f'this is sum of SECOND tuple reply {sum(len(i) for i in reply[1])}')
     #tweets out the grouped sections 
     today = date.today()
     d1 = today.strftime("%d/%m/%Y")
@@ -109,7 +108,7 @@ def top_efgp_tweet():
     # Initialize Tweet to build thread under
     tweet = f"Top 20 NBA EFG% players (as of {d1}), a thread \U0001F9F5:"
     tweet_head = api.update_status(status=tweet)
-    print(f'this is too large {reply[0]}')
+    # print(f'this is too large {reply[0]}')
     #reformats tuples into tweet form
     # for tuple in range(len(tweet)):
     #     " \n".join(tuple)

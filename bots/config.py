@@ -34,6 +34,7 @@ def create_api():
     return api
 
 # Scrapes the entire page stats for every NBA player in given season
+# returns headers and rows
 #### TODO ####
 # make the year modular, meaning when calling the function, you can change what year to scrape stats from
 # Helper function for collect_data_season
@@ -66,6 +67,7 @@ def scrape_season_stats():
     headers = headers[1:]
     #get rows from table
     rows = soup.findAll('tr', class_='full_table')
+    ## The CSV file is to better visualize the data, it's commented out by default 
     # #dataframe
     # player_stats = pd.DataFrame(rows_data, columns=headers)
     # #export to CSV
@@ -92,6 +94,9 @@ def convert(list, num):
             new_list.append(tuple(list[i-num:i]))
     return new_list
 
+def sort_categories():
+    pass
+
 # Creates database and tables and populates tables 
 def db_season_stats():
     headers, rows = scrape_season_stats()
@@ -99,8 +104,8 @@ def db_season_stats():
     conn = sqlite3.connect('my_database.db')
     cur = conn.cursor()
     
-    # WHen scraping data, each index represents a particular statistic
-    # In these next few lines, we are grouping the statistics into different categories 
+    # wHen scraping data, each index represents a particular statistic
+    # in these next few lines, we are grouping the statistics into different categories, the numbers representing different headers``
     # G == General, BOFF == Basic Offensive stats, AOFF == Advanced Offensive Stats, DEF == Defensive Stats
     Gindices = [0,1,2,3,4,5,6]
     BOFFindices = [7,8,10,11,13,14,17,18,23,28]
@@ -108,29 +113,28 @@ def db_season_stats():
     DEFindices = [24,25]
     OTHERindices = [20,21,22,26,27]
 
-    #initialize empty list for each statistical category
-    Glist = []
-    BOFFlist = []
-    AOFFlist = []
-    DEFlist = []
-    OTHERlist = []
-
-    #picks the headers based off specified indices
+    # picks the headers based off specified indices
+    # Gheaders =  ['Player', 'Pos', 'Age', 'Tm', 'G', 'GS', 'MP']
     Gheaders = headers[:7]
     BOFFheaders = [headers[index] for index in BOFFindices]
     AOFFheaders = [headers[index] for index in AOFFindices]
     DEFheaders = [headers[index] for index in DEFindices]
     OTHERheaders = [headers[index] for index in OTHERindices]
 
+    # initialize empty list for each statistical category
+    Glist, BOFFlist, AOFFlist, DEFlist, OTHERlist = ([] for i in range(5))
     # Collecting and format data for table
-    #The helper function uses the grouped indices (Gindices) to append to data into list (Glist)
+    # The helper function uses the grouped indices (Gindices) to append to data into list (Glist)
+    # Glist now contains all general stats from each player 
+    # Glist = ['Precious Achiuwa', 'C', '22', 'TOR', '73', '28', '23.6', 'Steven Adams', 'C', '28', 'MEM', '76', '75', '26.3'...]
     collect_data_season(Gindices, Glist)
     collect_data_season(BOFFindices, BOFFlist)
     collect_data_season(AOFFindices, AOFFlist)
     collect_data_season(DEFindices, DEFlist)
     collect_data_season(OTHERindices, OTHERlist)
 
-    # converts 
+    # converts list into tuple groups per player
+    # Glist = [('Precious Achiuwa', 'C', '22', 'TOR', '73', '28', '23.6'), ('Steven Adams', 'C', '28', 'MEM', '76', '75', '26.3')]
     Glist = convert(Glist, len(Gindices))
     BOFFlist = convert(BOFFlist, len(BOFFindices))
     AOFFlist = convert(AOFFlist, len(AOFFindices))
@@ -143,10 +147,10 @@ def db_season_stats():
     # create table general with all general categories
     cur.execute('''CREATE TABLE GENERAL 
                 (Player text, Pos text, Age INTEGER, Tm text, G INTEGER, GS INTEGER, MP real)''')
-    # insert the values of 
+    # insert headers into table
     cur.execute('INSERT INTO GENERAL VALUES(?,?,?,?,?,?,?)', Gheaders)
     cur.execute('SELECT * FROM GENERAL')
-    print(f'this is general table: {cur.fetchall()}')
+    # print(f'this is general table: {cur.fetchall()}')
 
     ## INIT BOFF Table
     cur.execute('DROP TABLE IF EXISTS BOFF')
@@ -154,7 +158,7 @@ def db_season_stats():
                 (FG real, FGA real, THP real, THPA real, TWOP real, TWOPA real, FT real, FTA real, AST real, PTS real)''')
     cur.execute('INSERT INTO BOFF VALUES(?,?,?,?,?,?,?,?,?,?)', BOFFheaders)
     cur.execute('SELECT * FROM BOFF')
-    print(f'this is BOFF table: {cur.fetchall()}')
+    # print(f'this is BOFF table: {cur.fetchall()}')
 
     ## INIT AOFF Table 
     cur.execute('DROP TABLE IF EXISTS AOFF')
@@ -162,7 +166,7 @@ def db_season_stats():
                 (FGP real, THPP real, TWOPP real, eFGP real, FTP real)''')
     cur.execute('INSERT INTO AOFF VALUES(?,?,?,?,?)', AOFFheaders)
     cur.execute('SELECT * FROM AOFF')
-    print(f'this is AOFF table: {cur.fetchall()}')
+    # print(f'this is AOFF table: {cur.fetchall()}')
 
     ## INIT DEF Table 
     cur.execute('DROP TABLE IF EXISTS DEF')
@@ -170,7 +174,7 @@ def db_season_stats():
                 (STL real, BLK real)''')
     cur.execute('INSERT INTO DEF VALUES(?,?)', DEFheaders)
     cur.execute('SELECT * FROM DEF')
-    print(f'this is DEF table: {cur.fetchall()}')
+    # print(f'this is DEF table: {cur.fetchall()}')
 
     ## INIT OTHER Table 
     cur.execute('DROP TABLE IF EXISTS OTHER')
@@ -178,20 +182,16 @@ def db_season_stats():
                 (ORB real, DRB real, TRB real, TOV real, PF real)''')
     cur.execute('INSERT INTO OTHER VALUES(?,?,?,?,?)', OTHERheaders)
     cur.execute('SELECT * FROM OTHER')
-    print(f'this is OTHER table: {cur.fetchall()}')
+    # print(f'this is OTHER table: {cur.fetchall()}')
 
     # This commits all the added tables and categories, essential to keep it saved 
     conn.commit()
 
+    #
     cur.executemany("INSERT INTO GENERAL VALUES(?,?,?,?,?,?,?)", (Glist))
     cur.executemany("INSERT INTO BOFF VALUES(?,?,?,?,?,?,?,?,?,?)", (BOFFlist))
     cur.executemany("INSERT INTO AOFF VALUES(?,?,?,?,?)", (AOFFlist))
     cur.executemany("INSERT INTO DEF VALUES(?,?)", (DEFlist))
     cur.executemany("INSERT INTO OTHER VALUES(?,?,?,?,?)", (OTHERlist))
     return conn, cur
-
-
-
-            
-
 
