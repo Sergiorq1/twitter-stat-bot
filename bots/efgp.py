@@ -51,15 +51,10 @@ def sort_tuples(sorted_list,tuple_list):
                 continue
     return tuple_list
 
-# Calling functions from config.py
-db_season_stats()
-top_efgp()
-player_id, players = top_efgp()[:2]
-
 def top_efgp_tweet():
     api = create_api()
     player_stats = top_efgp()[2]
-
+    players = top_efgp()[1]
     reply = []
     for i in range(len(players)):
         # formulate reply player from team percentage
@@ -86,8 +81,7 @@ def top_efgp_tweet():
     reply.insert(-1, tuple(reply[len(reply_changes):]))
     reply.pop()
     reply = reply[:len(reply_changes)] + reply[insert_len:]
-    # print(f"This should be it..... {reply}")
-    # print(reply, len(reply))
+    logger.info(f"This is the tweet with the total number of replies:\n{reply}\n{len(reply)}")
     # print(f'this is sum of first tuple reply {sum(len(i) for i in reply[0])}')
     # print(f'this is sum of SECOND tuple reply {sum(len(i) for i in reply[1])}')
     #tweets out the grouped sections 
@@ -109,7 +103,7 @@ def top_efgp_tweet():
         elif i == 1:
             after = api.update_status(status=reply[i],in_reply_to_status_id=thread_init.id,auto_populate_reply_metadata=True)  
         else:
-            after = api.update_status(status=reply[i],in_reply_to_status_id=after.id,auto_populate_reply_metadata=True)  
+            after = api.update_status(status=reply[i],in_reply_to_status_id=after.id,auto_populate_reply_metadata=True) 
 
 
 print(top_efgp_tweet())
