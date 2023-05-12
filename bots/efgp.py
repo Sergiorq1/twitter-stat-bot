@@ -1,7 +1,6 @@
 ### Effective field goal percentage leaders in a season ###
 #from config file
-from config import create_api
-from config import scrape_season_stats, collect_data_season, convert, db_season_stats
+from config import db_season_stats, create_api
 
 #for bot files
 from datetime import date
@@ -11,7 +10,6 @@ import sqlite3
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
-### Add totals for attempts after because I have to access a different URL and add data to table, for future implementations ###
 
 ##### GET top 10 players with highest effective FG percentage #####
 def top_efgp():
@@ -54,12 +52,9 @@ def sort_tuples(sorted_list,tuple_list):
     return tuple_list
 
 # Calling functions from config.py
-scrape_season_stats()
 db_season_stats()
 top_efgp()
 player_id, players = top_efgp()[:2]
-# print(sort_tuples(player_id, players))
-# print(player_id)
 
 def top_efgp_tweet():
     api = create_api()

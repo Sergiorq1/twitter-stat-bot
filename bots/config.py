@@ -40,7 +40,7 @@ def create_api():
 # Helper function for collect_data_season
 def scrape_season_stats():
     #url I'm scraping
-    url = "https://www.basketball-reference.com/leagues/NBA_2022_per_game.html"
+    url = "https://www.basketball-reference.com/leagues/NBA_2023_per_game.html"
 
     # collect html data
     #loops three times to make it stronger
@@ -76,7 +76,7 @@ def scrape_season_stats():
 
 # Iterates through each row and extracts text from all 'td' tags
 # the 'td' tags in the website are where the stats are coming from
-# Helper function for db_season_stats
+# Helper function for sort_categories
 def collect_data_season(indices, list):
     headers, rows = scrape_season_stats()
     #Loops through each row 
@@ -86,7 +86,7 @@ def collect_data_season(indices, list):
             list.append(rows[i].findAll('td')[td].getText())
 
 # Formats a list by grouping into tuples to easily add onto tables
-# Helper function for db_season_stats
+# Helper function for sort_categories
 def convert(list, num):
     new_list = []
     for i in range(1, len(list)+1):
@@ -94,17 +94,12 @@ def convert(list, num):
             new_list.append(tuple(list[i-num:i]))
     return new_list
 
+# organizes data for database use
+# helper function for db_season_stats
 def sort_categories():
-    pass
-
-# Creates database and tables and populates tables 
-def db_season_stats():
     headers, rows = scrape_season_stats()
-    # database connection
-    conn = sqlite3.connect('my_database.db')
-    cur = conn.cursor()
-    
-    # wHen scraping data, each index represents a particular statistic
+
+    # when scraping data, each index represents a particular statistic
     # in these next few lines, we are grouping the statistics into different categories, the numbers representing different headers``
     # G == General, BOFF == Basic Offensive stats, AOFF == Advanced Offensive Stats, DEF == Defensive Stats
     Gindices = [0,1,2,3,4,5,6]
@@ -140,6 +135,16 @@ def db_season_stats():
     AOFFlist = convert(AOFFlist, len(AOFFindices))
     DEFlist = convert(DEFlist, len(DEFindices))
     OTHERlist = convert(OTHERlist, len(OTHERindices))
+    
+    return Gheaders, BOFFheaders, AOFFheaders, DEFheaders, OTHERheaders, Glist, BOFFlist, AOFFlist, DEFlist, OTHERlist
+
+# Creates database and tables and populates tables 
+def db_season_stats():
+    # call sort_categories for data
+    Gheaders, BOFFheaders, AOFFheaders, DEFheaders, OTHERheaders, Glist, BOFFlist, AOFFlist, DEFlist, OTHERlist = sort_categories()
+    # database connection
+    conn = sqlite3.connect('my_database.db')
+    cur = conn.cursor()
 
     ## INIT GENERAL Table
     # remove general table if it exists already
@@ -194,4 +199,5 @@ def db_season_stats():
     cur.executemany("INSERT INTO DEF VALUES(?,?)", (DEFlist))
     cur.executemany("INSERT INTO OTHER VALUES(?,?,?,?,?)", (OTHERlist))
     return conn, cur
+
 
