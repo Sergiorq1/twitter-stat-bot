@@ -187,7 +187,7 @@ def db_season_stats():
     # This commits all the added tables and categories, essential to keep it saved 
     conn.commit()
 
-    #
+    # inserts values for all players for given categories 
     cur.executemany("INSERT INTO GENERAL VALUES(?,?,?,?,?,?,?)", (Glist))
     cur.executemany("INSERT INTO BOFF VALUES(?,?,?,?,?,?,?,?,?,?)", (BOFFlist))
     cur.executemany("INSERT INTO AOFF VALUES(?,?,?,?,?)", (AOFFlist))

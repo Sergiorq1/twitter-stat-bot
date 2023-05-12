@@ -9,7 +9,6 @@ import tweepy
 import logging
 from config import create_api
 import time
-# from tkinter.tix import INTEGER
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
@@ -25,7 +24,7 @@ def top_efgp():
     # print(f'these are the top 10 players with the highest Effective field goal percentage: {EFGP_stats}')
     conn.commit()
     # SELECT FROM GENERAL table to get names of NBA players using tuple numbers
-    #ordered list of highest to lowest efg%
+    # ordered list of highest to lowest efg%
     player_id = list(i[0] for i in EFGP_stats)
     player_stats = list(i[1] for i in EFGP_stats)
     efgp_players = 'SELECT rowid, Player, TM FROM GENERAL where rowid IN ({seq})'.format(
@@ -38,14 +37,14 @@ def top_efgp():
 
 # reorganize players list by comparing it to a given list, only works correctly if match
 def sort_tuples(sorted_list,tuple_list):
-    #only loops once
+    # only loops once
     for id in range(len(sorted_list)):
-        #loops as many times as necessary
+        # loops as many times as necessary
         for i in range(len(tuple_list)):
             # if current index value num matches current index 
             if tuple_list[i][0] == sorted_list[id]:
                 tuple_list.insert(id, tuple_list[i])
-                #if tuple_list index position is greater than index position of s_list
+                # if tuple_list index position is greater than index position of s_list
                 if i > id:
                     tuple_list.pop(i+1)
                 else:
@@ -53,10 +52,9 @@ def sort_tuples(sorted_list,tuple_list):
                 break
             else:
                 continue
-
     return tuple_list
 
-#Calling functions from config.py
+# Calling functions from config.py
 scrape_season_stats()
 db_season_stats()
 top_efgp()
@@ -64,16 +62,13 @@ player_id, players = top_efgp()[:2]
 # print(sort_tuples(player_id, players))
 # print(player_id)
 
-# logging.basicConfig(level=logging.INFO)
-# logger = logging.getLogger()
-
 def top_efgp_tweet():
     api = create_api()
     player_stats = top_efgp()[2]
 
     reply = []
     for i in range(len(players)):
-        #formulate reply player from team percentage
+        # formulate reply player from team percentage
         reply.append(f'''{players[i][1]} from {players[i][2]} ({player_stats[i]})''')
     # print(reply)
     # groups thread into sections that will be just under the 280 character size limit
@@ -84,15 +79,15 @@ def top_efgp_tweet():
         # if max character size is reached
         if sum(len(i) for i in reply[num_list[0]:(player)]) > 280:
             # create a tuple of max amount of players who will fit into one tweet
-            #first add tuple in front of soon-to-be-removed indices
+            # first add tuple in front of soon-to-be-removed indices
             reply.insert(player+1, tuple(reply[ num_list[0] : (num_list[0]+(len(num_list)-2)) ]))
-            #remove duplicated
+            # remove duplicated
             reply = reply[:(player+1)-len(num_list)] + reply[player+1:]
-            #clear list so next first index of new_list matches the tuple creation's beginning index
+            # clear list so next first index of new_list matches the tuple creation's beginning index
             reply_changes.append(1)
             num_list.clear()
-    #extend based on all numbers outside the tuple
-    #without using reply[1] because it may not even be the second index
+    # extend based on all numbers outside the tuple
+    # without using reply[1] because it may not even be the second index
     insert_len = len(reply[len(reply_changes):])
     reply.insert(-1, tuple(reply[len(reply_changes):]))
     reply.pop()
@@ -123,24 +118,5 @@ def top_efgp_tweet():
             after = api.update_status(status=reply[i],in_reply_to_status_id=after.id,auto_populate_reply_metadata=True)  
 
 
-
-
 print(top_efgp_tweet())
         
-
-
-
-
-    
-
-
-# def main():
-#     api = create_api()
-#     while True:
-#         top_efgp_tweet(api)
-#         logger.info("Waiting...")
-#         time.sleep(60)
-
-# if __name__ == "__main__":
-#     main()
-# make a twitter post that uses acquired data to automate EFG% 
