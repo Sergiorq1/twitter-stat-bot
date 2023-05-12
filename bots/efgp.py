@@ -1,14 +1,13 @@
-# Effective field goal percentage leaders in a season
-from datetime import date
-from urllib.request import urlopen
-from bs4 import BeautifulSoup
-from config import scrape_season_stats, collect_data_season, convert, db_season_stats
-import pandas as pd
-import sqlite3
-import tweepy
-import logging
+### Effective field goal percentage leaders in a season ###
+#from config file
 from config import create_api
-import time
+from config import scrape_season_stats, collect_data_season, convert, db_season_stats
+
+#for bot files
+from datetime import date
+import logging
+import tweepy
+import sqlite3
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
