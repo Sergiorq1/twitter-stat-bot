@@ -32,25 +32,6 @@ def top_efgp():
     conn.close()
     return player_id, players, player_stats
 
-# reorganize players list by comparing it to a given list, only works correctly if match
-def sort_tuples(sorted_list,tuple_list):
-    # only loops once
-    for id in range(len(sorted_list)):
-        # loops as many times as necessary
-        for i in range(len(tuple_list)):
-            # if current index value num matches current index 
-            if tuple_list[i][0] == sorted_list[id]:
-                tuple_list.insert(id, tuple_list[i])
-                # if tuple_list index position is greater than index position of s_list
-                if i > id:
-                    tuple_list.pop(i+1)
-                else:
-                    tuple_list.pop(i)
-                break
-            else:
-                continue
-    return tuple_list
-
 def top_efgp_tweet():
     api = create_api()
     player_stats = top_efgp()[2]
@@ -104,7 +85,6 @@ def top_efgp_tweet():
             after = api.update_status(status=reply[i],in_reply_to_status_id=thread_init.id,auto_populate_reply_metadata=True)  
         else:
             after = api.update_status(status=reply[i],in_reply_to_status_id=after.id,auto_populate_reply_metadata=True) 
-
 
 print(top_efgp_tweet())
         
