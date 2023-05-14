@@ -11,7 +11,7 @@ import sqlite3
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger()
 
-##### GET top 10 players with highest effective FG percentage #####
+# gets top 10 players with highest effective FG percentage
 def top_efgp():
     conn, cur = db_season_stats()
     # find 10 highest numbers in eFG%
@@ -32,15 +32,15 @@ def top_efgp():
     conn.close()
     return player_id, players, player_stats
 
-def top_efgp_tweet():
-    api = create_api()
+# organize db data to make it tweet ready
+#takes into account character limit, and makes separate tuples to tweet in a thread style
+def tweet_ready_stats():
     player_stats = top_efgp()[2]
     players = top_efgp()[1]
     reply = []
     for i in range(len(players)):
         # formulate reply player from team percentage
         reply.append(f'''{players[i][1]} from {players[i][2]} ({player_stats[i]})''')
-    # print(reply)
     # groups thread into sections that will be just under the 280 character size limit
     num_list = []
     reply_changes = []
@@ -63,8 +63,13 @@ def top_efgp_tweet():
     reply.pop()
     reply = reply[:len(reply_changes)] + reply[insert_len:]
     logger.info(f"This is the tweet with the total number of replies:\n{reply}\n{len(reply)}")
-    # print(f'this is sum of first tuple reply {sum(len(i) for i in reply[0])}')
-    # print(f'this is sum of SECOND tuple reply {sum(len(i) for i in reply[1])}')
+    return reply
+
+###### TODO: make the character limit a separate function that we call from config.py ######
+# executes tweet with replies 
+def top_efgp_tweet():
+    api = create_api()
+    reply = tweet_ready_stats()
     #tweets out the grouped sections 
     today = date.today()
     d1 = today.strftime("%d/%m/%Y")
@@ -72,10 +77,6 @@ def top_efgp_tweet():
     # Initialize Tweet to build thread under
     tweet = f"Top 20 NBA EFG% players (as of {d1}), a thread \U0001F9F5:"
     tweet_head = api.update_status(status=tweet)
-    # print(f'this is too large {reply[0]}')
-    #reformats tuples into tweet form
-    # for tuple in range(len(tweet)):
-    #     " \n".join(tuple)
 
     reply = [" ".join(tups) for tups in reply]
     for i in range(len(reply)):
@@ -85,6 +86,7 @@ def top_efgp_tweet():
             after = api.update_status(status=reply[i],in_reply_to_status_id=thread_init.id,auto_populate_reply_metadata=True)  
         else:
             after = api.update_status(status=reply[i],in_reply_to_status_id=after.id,auto_populate_reply_metadata=True) 
+    return "Tweet has been Tweeted!"
 
 print(top_efgp_tweet())
         
