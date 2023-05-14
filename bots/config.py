@@ -200,4 +200,34 @@ def db_season_stats():
     cur.executemany("INSERT INTO OTHER VALUES(?,?,?,?,?)", (OTHERlist))
     return conn, cur
 
-
+# organize db data to make it tweet ready
+#takes into account character limit, and makes separate tuples to tweet in a thread style
+def tweet_ready_stats(players, player_stats):
+    reply = []
+    for i in range(len(players)):
+        # formulate reply for player and stat
+        reply.append(f'''{players[i][1]} from {players[i][2]} ({player_stats[i]})''')
+    # groups thread into sections that will be just under the 280 character size limit
+    num_list = []
+    reply_changes = []
+    for player in range(len(reply)):
+        num_list.append(player)
+        # if max character size is reached
+        if sum(len(i) for i in reply[num_list[0]:(player)]) > 280:
+            # create a tuple of max amount of players who will fit into one tweet
+            # first add tuple in front of soon-to-be-removed indices
+            reply.insert(player+1, tuple(reply[ num_list[0] : (num_list[0]+(len(num_list)-2)) ]))
+            # remove duplicated
+            reply = reply[:(player+1)-len(num_list)] + reply[player+1:]
+            # clear list so next first index of new_list matches the tuple creation's beginning index
+            reply_changes.append(1)
+            num_list.clear()
+    # extend based on all numbers outside the tuple
+    # without using reply[1] because it may not even be the second index
+    insert_len = len(reply[len(reply_changes):])
+    reply.insert(-1, tuple(reply[len(reply_changes):]))
+    reply.pop()
+    reply = reply[:len(reply_changes)] + reply[insert_len:]
+    logger.info(f"This is the tweet with the total number of replies:\n{reply}\n{len(reply)}")
+    reply = [" ".join(tuples) for tuples in reply]
+    return reply

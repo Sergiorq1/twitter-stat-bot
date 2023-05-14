@@ -1,6 +1,6 @@
 ### Effective field goal percentage leaders in a season ###
 #from config file
-from config import db_season_stats, create_api
+from config import db_season_stats, create_api, tweet_ready_stats
 
 #for bot files
 from datetime import date
@@ -30,46 +30,14 @@ def top_efgp():
     players = cur.fetchall()
     cur.close()
     conn.close()
-    return player_id, players, player_stats
+    return players, player_stats
 
-# organize db data to make it tweet ready
-#takes into account character limit, and makes separate tuples to tweet in a thread style
-def tweet_ready_stats():
-    player_stats = top_efgp()[2]
-    players = top_efgp()[1]
-    reply = []
-    for i in range(len(players)):
-        # formulate reply player from team percentage
-        reply.append(f'''{players[i][1]} from {players[i][2]} ({player_stats[i]})''')
-    # groups thread into sections that will be just under the 280 character size limit
-    num_list = []
-    reply_changes = []
-    for player in range(len(reply)):
-        num_list.append(player)
-        # if max character size is reached
-        if sum(len(i) for i in reply[num_list[0]:(player)]) > 280:
-            # create a tuple of max amount of players who will fit into one tweet
-            # first add tuple in front of soon-to-be-removed indices
-            reply.insert(player+1, tuple(reply[ num_list[0] : (num_list[0]+(len(num_list)-2)) ]))
-            # remove duplicated
-            reply = reply[:(player+1)-len(num_list)] + reply[player+1:]
-            # clear list so next first index of new_list matches the tuple creation's beginning index
-            reply_changes.append(1)
-            num_list.clear()
-    # extend based on all numbers outside the tuple
-    # without using reply[1] because it may not even be the second index
-    insert_len = len(reply[len(reply_changes):])
-    reply.insert(-1, tuple(reply[len(reply_changes):]))
-    reply.pop()
-    reply = reply[:len(reply_changes)] + reply[insert_len:]
-    logger.info(f"This is the tweet with the total number of replies:\n{reply}\n{len(reply)}")
-    return reply
-
-###### TODO: make the character limit a separate function that we call from config.py ######
 # executes tweet with replies 
 def top_efgp_tweet():
     api = create_api()
-    reply = tweet_ready_stats()
+    players = top_efgp()[0]
+    player_stats = top_efgp()[1]
+    reply = tweet_ready_stats(players, player_stats)
     #tweets out the grouped sections 
     today = date.today()
     d1 = today.strftime("%d/%m/%Y")
@@ -78,13 +46,15 @@ def top_efgp_tweet():
     tweet = f"Top 20 NBA EFG% players (as of {d1}), a thread \U0001F9F5:"
     tweet_head = api.update_status(status=tweet)
 
-    reply = [" ".join(tups) for tups in reply]
     for i in range(len(reply)):
         if i == 0:
+            #This makes sure to reply to tweet head
             thread_init = api.update_status(status=reply[i],in_reply_to_status_id=tweet_head.id,auto_populate_reply_metadata=True)
         elif i == 1:
+            #This makes sure to reply to first reply
             after = api.update_status(status=reply[i],in_reply_to_status_id=thread_init.id,auto_populate_reply_metadata=True)  
         else:
+            #This makes sure to reply to latest reply from thread
             after = api.update_status(status=reply[i],in_reply_to_status_id=after.id,auto_populate_reply_metadata=True) 
     return "Tweet has been Tweeted!"
 
