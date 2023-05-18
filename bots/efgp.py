@@ -1,6 +1,6 @@
 ### Effective field goal percentage leaders in a season ###
 # from config file
-from config import db_season_stats, create_api, tweet_ready_stats, sort_tuples
+from config import db_season_stats, create_api, tweet_ready_stats, sort_tuples, convert_decimal_to_percent
 
 # for bot files
 from datetime import date
@@ -43,6 +43,7 @@ def top_efgp_tweet():
     api = create_api()
     players = top_efgp()[0]
     player_stats = top_efgp()[1]
+    player_stats = convert_decimal_to_percent(player_stats)
     reply = tweet_ready_stats(players, player_stats)
     #tweets out the grouped sections 
     today = date.today()

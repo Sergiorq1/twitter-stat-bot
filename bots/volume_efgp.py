@@ -1,6 +1,6 @@
 ### Effective field goal percentage leaders in a season, with 6.5 field goal attempts per game or higher ###
 # from config file
-from config import db_season_stats, create_api, tweet_ready_stats, sort_tuples
+from config import db_season_stats, create_api, tweet_ready_stats, sort_tuples, convert_decimal_to_percent
 
 # for bot files
 from datetime import date
@@ -45,12 +45,6 @@ def top_volume_efgp():
     conn.close()
     return sorted_players, player_stats
 
-def convert_decimal_to_percent(list1):
-    new_list = []
-    for val in list1:
-        new_list.append(str(round(val*100)) + '%')
-    print(f'this is the new_list: {new_list}')
-    return new_list
 # executes tweet with replies 
 def top_volume_efgp_tweet():
     api = create_api()

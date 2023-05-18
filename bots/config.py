@@ -262,3 +262,11 @@ def sort_tuples(sorted_list,tuple_list):
             else:
                 continue
     return tuple_list
+
+# Converts decimal values to percent values
+def convert_decimal_to_percent(list1):
+    new_list = []
+    for val in list1:
+        new_list.append(str(round(val*100)) + '%')
+    print(f'this is the new_list: {new_list}')
+    return new_list
