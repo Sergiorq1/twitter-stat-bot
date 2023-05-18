@@ -203,31 +203,62 @@ def db_season_stats():
 # organize db data to make it tweet ready
 #takes into account character limit, and makes separate tuples to tweet in a thread style
 def tweet_ready_stats(players, player_stats):
+    character_limit = 280
     reply = []
     for i in range(len(players)):
         # formulate reply for player and stat
-        reply.append(f'''{players[i][1]} from {players[i][2]} ({player_stats[i]})''')
+        reply.append(f'''{i+1}. {players[i][1]} from {players[i][2]} {player_stats[i]}\n''')
     # groups thread into sections that will be just under the 280 character size limit
     num_list = []
-    reply_changes = []
+    # an int value that keeps track of amount of times the reply has been changed 
+    reply_changes = 0
+    # new_reply will be where tuples are added onto
+    new_reply = []
     for player in range(len(reply)):
+        #take into account \n which adds a character
+        character_limit -= 1
+        print(f'character_limit: {character_limit}')
+        #this gets reset when character limit is met
         num_list.append(player)
+        print(f'this is num_list: {num_list}')
+        if player == (len(reply)-1):
+            break
         # if max character size is reached
-        if sum(len(i) for i in reply[num_list[0]:(player)]) > 280:
+        if sum(len(i) for i in reply[num_list[0]:(player+1)]) > character_limit:
+            #resets character limit 
+            character_limit = 280
             # create a tuple of max amount of players who will fit into one tweet
-            # first add tuple in front of soon-to-be-removed indices
-            reply.insert(player+1, tuple(reply[ num_list[0] : (num_list[0]+(len(num_list)-2)) ]))
-            # remove duplicated
-            reply = reply[:(player+1)-len(num_list)] + reply[player+1:]
+            # append tuple to new reply
+            new_reply.append(tuple(reply[ num_list[0] : player ]))
             # clear list so next first index of new_list matches the tuple creation's beginning index
-            reply_changes.append(1)
+            reply_changes += 1
             num_list.clear()
+            num_list.append(player)
     # extend based on all numbers outside the tuple
     # without using reply[1] because it may not even be the second index
-    insert_len = len(reply[len(reply_changes):])
-    reply.insert(-1, tuple(reply[len(reply_changes):]))
-    reply.pop()
-    reply = reply[:len(reply_changes)] + reply[insert_len:]
+    new_reply.append(tuple(reply[num_list[0]:]))
+    reply = new_reply
     logger.info(f"This is the tweet with the total number of replies:\n{reply}\n{len(reply)}")
+    print(4)
     reply = [" ".join(tuples) for tuples in reply]
+    print(reply)
     return reply
+
+# reorganize players list by comaring it to a given list, only works correctly if match
+def sort_tuples(sorted_list,tuple_list):
+    #only loops once
+    for id in range(len(sorted_list)):
+        #loops as many times as necessary
+        for i in range(len(tuple_list)):
+            # if current index value num matches current index 
+            if tuple_list[i][0] == sorted_list[id]:
+                tuple_list.insert(id, tuple_list[i])
+                #if tuple_list index position is greater than index position of s_list
+                if i > id:
+                    tuple_list.pop(i+1)
+                else:
+                    tuple_list.pop(i)
+                break
+            else:
+                continue
+    return tuple_list
