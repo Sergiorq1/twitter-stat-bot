@@ -1,6 +1,7 @@
 .env
 .venv
 .package-lock.json
+.vscode
 __pycache__
 players_stats.csv
 my_database.db
